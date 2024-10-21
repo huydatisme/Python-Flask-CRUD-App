@@ -7,10 +7,10 @@ fa = FontAwesome(app)
 
 app.secret_key = 'flash message'
 
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'python_crud'
+app.config['MYSQL_HOST'] = 'pythonapp-server.mysql.database.azure.com'
+app.config['MYSQL_USER'] = 'wkgbruzspx'
+app.config['MYSQL_PASSWORD'] = 'AS$5xZXAJLweQfuQ'
+app.config['MYSQL_DB'] = 'pythonapp-database'
 
 mysql = MySQL(app)
 
