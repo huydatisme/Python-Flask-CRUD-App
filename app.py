@@ -9,7 +9,7 @@ app.secret_key = 'flash message'
 
 app.config['MYSQL_HOST'] = 'pythonserver.mysql.database.azure.com'
 app.config['MYSQL_USER'] = 'qpcuwuzjqx'
-app.config['MYSQL_PASSWORD'] = 'Dat1122334455'
+app.config['MYSQL_PASSWORD'] = 'Dat12345'
 app.config['MYSQL_DB'] = 'Python_app-database'
 
 mysql = MySQL(app)
