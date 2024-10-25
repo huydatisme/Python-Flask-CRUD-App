@@ -2,7 +2,6 @@
 
 CREATE DATABASE IF NOT EXISTS 'flaskapp-database';
 
-USE flaskapp-database;
 
 CREATE TABLE IF NOT EXISTS 'students' (
     id INT AUTO_INCREMENT PRIMARY KEY,
