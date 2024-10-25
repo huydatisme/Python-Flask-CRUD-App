@@ -1,8 +1,6 @@
 CREATE DATABASE IF NOT EXISTS `flaskapp-database`;
 
-USE `flaskapp-database`;
-
-CREATE TABLE IF NOT EXISTS `students` (
+CREATE TABLE IF NOT EXISTS `flaskapp-database`.`students` (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100),
     email VARCHAR(100),
