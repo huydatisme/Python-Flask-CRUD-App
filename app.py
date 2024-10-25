@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_mysqldb import MySQL
+import pymysql
 from flask_fontawesome import FontAwesome
 
 app = Flask(__name__)
@@ -7,23 +7,27 @@ fa = FontAwesome(app)
 
 app.secret_key = 'flash message'
 
-app.config['MYSQL_HOST'] = 'flaskapp-server.mysql.database.azure.com'
-app.config['MYSQL_USER'] = 'djjgyvklbr'
-app.config['MYSQL_PASSWORD'] = 'juOA4iWDL$98oLR4'
-app.config['MYSQL_DB'] = 'flaskapp-database'
-
-mysql = MySQL(app)
-
+# Cấu hình kết nối MySQL
+db_connection = pymysql.connect(
+    host='flaskappdb.cpmaug0s6xof.ap-northeast-1.rds.amazonaws.com',
+    user='admin',
+    password='Dat1122334455',
+    db='flaskapp-database',
+    port=3306,
+    charset='utf8mb4',
+    cursorclass=pymysql.cursors.DictCursor
+)
 
 @app.route('/')
 def index():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM students")
-    data = cur.fetchall()
-    cur.close()
-
-    return render_template('index.html', students=data)
-
+    try:
+        with db_connection.cursor() as cur:
+            cur.execute("SELECT * FROM students")
+            data = cur.fetchall()
+        return render_template('index.html', students=data)
+    except Exception as e:
+        flash(f"Error: {str(e)}")
+        return render_template('index.html', students=[])
 
 @app.route('/insert', methods=['POST'])
 def insert():
@@ -34,12 +38,16 @@ def insert():
         email = request.form['email']
         phone = request.form['phone']
 
-        cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO students(name, email, phone) VALUES(%s, %s, %s)", (name, email, phone))
-        mysql.connection.commit()
-        return redirect(url_for('index'))
+        try:
+            with db_connection.cursor() as cur:
+                cur.execute("INSERT INTO students (name, email, phone) VALUES (%s, %s, %s)", (name, email, phone))
+                db_connection.commit()
+            return redirect(url_for('index'))
+        except Exception as e:
+            flash(f"Error: {str(e)}")
+            return redirect(url_for('index'))
 
-@app.route('/update', methods=['POST','GET'])
+@app.route('/update', methods=['POST', 'GET'])
 def update():
     if request.method == "POST":
         flash("Data Updated Successfully")
@@ -49,23 +57,31 @@ def update():
         email = request.form['email']
         phone = request.form['phone']
 
-        cur = mysql.connection.cursor()
-        cur.execute("""
-        UPDATE students
-        SET name=%s, email=%s, phone=%s
-        WHERE id=%s
-        """, (name, email, phone, id_data))
-        mysql.connection.commit()
-        return redirect(url_for('index'))
+        try:
+            with db_connection.cursor() as cur:
+                cur.execute("""
+                UPDATE students
+                SET name=%s, email=%s, phone=%s
+                WHERE id=%s
+                """, (name, email, phone, id_data))
+                db_connection.commit()
+            return redirect(url_for('index'))
+        except Exception as e:
+            flash(f"Error: {str(e)}")
+            return redirect(url_for('index'))
 
-@app.route('/delete/<string:id_data>', methods=['POST','GET'])
+@app.route('/delete/<string:id_data>', methods=['POST', 'GET'])
 def delete(id_data):
     flash("Data Deleted Successfully")
 
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM students WHERE id=%s", (id_data))
-    mysql.connection.commit()
-    return redirect(url_for('index'))
+    try:
+        with db_connection.cursor() as cur:
+            cur.execute("DELETE FROM students WHERE id=%s", (id_data,))
+            db_connection.commit()
+        return redirect(url_for('index'))
+    except Exception as e:
+        flash(f"Error: {str(e)}")
+        return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run(debug=True)
