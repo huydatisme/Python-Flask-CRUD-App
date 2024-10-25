@@ -9,10 +9,10 @@ app.secret_key = 'flash message'
 
 # Cấu hình kết nối MySQL
 db_connection = pymysql.connect(
-    host='flaskappdb.cpmaug0s6xof.ap-northeast-1.rds.amazonaws.com',
-    user='admin',
-    password='Dat1122334455',
-    db='flaskapp-database',
+    host='flaskapp-server.mysql.database.azure.com',
+    user='elxrnxtgoc',
+    password='mtBbthxDOdpYs7$r',
+    db='flaskapp_database',
     port=3306,
     charset='utf8mb4',
     cursorclass=pymysql.cursors.DictCursor
