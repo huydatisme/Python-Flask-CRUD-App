@@ -9,9 +9,9 @@ app.secret_key = 'flash message'
 
 # Cấu hình kết nối MySQL
 db_connection = pymysql.connect(
-    host='flaskserver.mysql.database.azure.com',
-    user='nhyjmrbbrt',
-    password='mtCMBj$77VQwyg9w',
+    host='flaskapp-server.mysql.database.azure.com',
+    user='gnhtcebvax',
+    password='CJcTF25jDk$W9wk8',
     db='flaskapp_database',
     port=3306,
     charset='utf8mb4',
