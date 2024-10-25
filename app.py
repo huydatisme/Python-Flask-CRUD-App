@@ -18,16 +18,34 @@ db_connection = pymysql.connect(
     cursorclass=pymysql.cursors.DictCursor
 )
 
+def create_database_and_table():
+    # Connect to MySQL without specifying a database
+    connection = pymysql.connect(
+        host=app.config['MYSQL_HOST'],
+        user=app.config['MYSQL_USER'],
+        password=app.config['MYSQL_PASSWORD']
+    )
+    
+    try:
+        with connection.cursor() as cursor:
+            # Execute SQL commands from the file
+            with open('create_database.sql', 'r') as f:
+                sql_script = f.read()
+                cursor.execute(sql_script)
+        connection.commit()
+    finally:
+        connection.close()
+
+# Create database and table when starting the application
+create_database_and_table()
+
 @app.route('/')
 def index():
-    try:
-        with db_connection.cursor() as cur:
-            cur.execute("SELECT * FROM students")
-            data = cur.fetchall()
-        return render_template('index.html', students=data)
-    except Exception as e:
-        flash(f"Error: {str(e)}")
-        return render_template('index.html', students=[])
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM students")
+    data = cur.fetchall()
+    cur.close()
+    return render_template('index.html', students=data)
 
 @app.route('/insert', methods=['POST'])
 def insert():
@@ -38,16 +56,13 @@ def insert():
         email = request.form['email']
         phone = request.form['phone']
 
-        try:
-            with db_connection.cursor() as cur:
-                cur.execute("INSERT INTO students (name, email, phone) VALUES (%s, %s, %s)", (name, email, phone))
-                db_connection.commit()
-            return redirect(url_for('index'))
-        except Exception as e:
-            flash(f"Error: {str(e)}")
-            return redirect(url_for('index'))
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO students (name, email, phone) VALUES (%s, %s, %s)", (name, email, phone))
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('index'))
 
-@app.route('/update', methods=['POST', 'GET'])
+@app.route('/update', methods=['POST'])
 def update():
     if request.method == "POST":
         flash("Data Updated Successfully")
@@ -57,31 +72,25 @@ def update():
         email = request.form['email']
         phone = request.form['phone']
 
-        try:
-            with db_connection.cursor() as cur:
-                cur.execute("""
-                UPDATE students
-                SET name=%s, email=%s, phone=%s
-                WHERE id=%s
-                """, (name, email, phone, id_data))
-                db_connection.commit()
-            return redirect(url_for('index'))
-        except Exception as e:
-            flash(f"Error: {str(e)}")
-            return redirect(url_for('index'))
+        cur = mysql.connection.cursor()
+        cur.execute("""
+        UPDATE students
+        SET name=%s, email=%s, phone=%s
+        WHERE id=%s
+        """, (name, email, phone, id_data))
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('index'))
 
-@app.route('/delete/<string:id_data>', methods=['POST', 'GET'])
+@app.route('/delete/<string:id_data>', methods=['POST'])
 def delete(id_data):
     flash("Data Deleted Successfully")
 
-    try:
-        with db_connection.cursor() as cur:
-            cur.execute("DELETE FROM students WHERE id=%s", (id_data,))
-            db_connection.commit()
-        return redirect(url_for('index'))
-    except Exception as e:
-        flash(f"Error: {str(e)}")
-        return redirect(url_for('index'))
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM students WHERE id=%s", (id_data,))
+    mysql.connection.commit()
+    cur.close()
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run(debug=True)
