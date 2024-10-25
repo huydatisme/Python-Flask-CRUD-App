@@ -4,28 +4,24 @@ from flask_fontawesome import FontAwesome
 
 app = Flask(__name__)
 fa = FontAwesome(app)
-
 app.secret_key = 'flash message'
 
 # Cấu hình kết nối MySQL
-db_connection = pymysql.connect(
-    host='flaskapp-server.mysql.database.azure.com',
-    user='gnhtcebvax',
-    password='CJcTF25jDk$W9wk8',
-    db='flaskapp-database',
-    port=3306,
-    charset='utf8mb4',
-    cursorclass=pymysql.cursors.DictCursor
-)
+db_config = {
+    'host': 'flaskapp-server.mysql.database.azure.com',
+    'user': 'gnhtcebvax',
+    'password': 'CJcTF25jDk$W9wk8',
+    'db': 'flaskapp-database',
+    'port': 3306,
+    'charset': 'utf8mb4',
+    'cursorclass': pymysql.cursors.DictCursor
+}
+
+def get_db_connection():
+    return pymysql.connect(**db_config)
 
 def create_database_and_table():
-    # Connect to MySQL without specifying a database
-    connection = pymysql.connect(
-        host=app.config['MYSQL_HOST'],
-        user=app.config['MYSQL_USER'],
-        password=app.config['MYSQL_PASSWORD']
-    )
-    
+    connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
             # Execute SQL commands from the file
@@ -36,16 +32,18 @@ def create_database_and_table():
     finally:
         connection.close()
 
-# Create database and table when starting the application
 create_database_and_table()
 
 @app.route('/')
 def index():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM students")
-    data = cur.fetchall()
-    cur.close()
-    return render_template('index.html', students=data)
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cur:
+            cur.execute("SELECT * FROM students")
+            data = cur.fetchall()
+        return render_template('index.html', students=data)
+    finally:
+        connection.close()
 
 @app.route('/insert', methods=['POST'])
 def insert():
@@ -56,10 +54,13 @@ def insert():
         email = request.form['email']
         phone = request.form['phone']
 
-        cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO students (name, email, phone) VALUES (%s, %s, %s)", (name, email, phone))
-        mysql.connection.commit()
-        cur.close()
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cur:
+                cur.execute("INSERT INTO students (name, email, phone) VALUES (%s, %s, %s)", (name, email, phone))
+            connection.commit()
+        finally:
+            connection.close()
         return redirect(url_for('index'))
 
 @app.route('/update', methods=['POST'])
@@ -72,24 +73,30 @@ def update():
         email = request.form['email']
         phone = request.form['phone']
 
-        cur = mysql.connection.cursor()
-        cur.execute("""
-        UPDATE students
-        SET name=%s, email=%s, phone=%s
-        WHERE id=%s
-        """, (name, email, phone, id_data))
-        mysql.connection.commit()
-        cur.close()
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cur:
+                cur.execute("""
+                UPDATE students
+                SET name=%s, email=%s, phone=%s
+                WHERE id=%s
+                """, (name, email, phone, id_data))
+            connection.commit()
+        finally:
+            connection.close()
         return redirect(url_for('index'))
 
 @app.route('/delete/<string:id_data>', methods=['POST'])
 def delete(id_data):
     flash("Data Deleted Successfully")
 
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM students WHERE id=%s", (id_data,))
-    mysql.connection.commit()
-    cur.close()
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cur:
+            cur.execute("DELETE FROM students WHERE id=%s", (id_data,))
+        connection.commit()
+    finally:
+        connection.close()
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
