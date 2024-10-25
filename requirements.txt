@@ -1,7 +1,6 @@
 Flask==2.3.3
 pymysql==1.0.3
-Flask-MySQLdb==1.0.1
 Flask-SQLAlchemy==3.0.5
 Flask-Migrate==4.0.4
-Flask-FontAwesome==0.3
+Flask-FontAwesome==0.1.5
 Werkzeug>=2.3.7
